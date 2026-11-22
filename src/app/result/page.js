@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -26,7 +27,6 @@ export default function ResultPage() {
       const fullDataUrl = reader.result;
       setPreviewUrl(fullDataUrl);
 
-      // Strip the "data:image/...;base64," prefix so the API receives a clean base64 string
       const base64String = fullDataUrl.split(",")[1];
       await analyzeImage(base64String);
     };
@@ -68,7 +68,12 @@ export default function ResultPage() {
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-white flex flex-col justify-between pt-20 pb-8 px-6 md:px-10">
       {/* Top Left Header & Top Right Preview Box */}
-      <div className="flex items-start justify-between z-10">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex items-start justify-between z-10"
+      >
         <div className="text-[11px] font-semibold tracking-wider uppercase text-[#1A1B1C]">
           TO START ANALYSIS
         </div>
@@ -79,7 +84,9 @@ export default function ResultPage() {
           </span>
           <div className="w-24 h-24 border border-gray-300 bg-gray-50 flex items-center justify-center overflow-hidden">
             {previewUrl ? (
-              <img
+              <motion.img
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 src={previewUrl}
                 alt="Selected preview"
                 className="w-full h-full object-cover"
@@ -89,31 +96,56 @@ export default function ResultPage() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Center Section: Loading State OR Camera vs Gallery Options */}
       {loading ? (
-        <div className="relative flex-1 flex flex-col items-center justify-center my-auto">
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200 rotate-[35deg] animate-spin [animation-duration:25s]" />
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300 rotate-[45deg] animate-spin [animation-duration:20s]" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative flex-1 flex flex-col items-center justify-center my-auto"
+        >
+          <motion.div
+            animate={{ rotate: 395 }}
+            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200"
+          />
+          <motion.div
+            animate={{ rotate: -315 }}
+            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300"
+          />
           <p className="z-10 text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#1A1B1C] animate-pulse">
             PREPARING YOUR ANALYSIS...
           </p>
-        </div>
+        </motion.div>
       ) : (
         <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-20 lg:gap-40 my-auto z-10">
-          {/* Option 1: Camera Scan (Links to /camera for Phase 3) */}
-          <div className="relative flex flex-col items-center justify-center">
-            <div className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-200 rotate-[35deg] pointer-events-none" />
-            <div className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-300 rotate-[45deg] pointer-events-none" />
+          {/* Option 1: Camera Scan */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="relative flex flex-col items-center justify-center"
+          >
+            <motion.div
+              animate={{ rotate: 395 }}
+              transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+              className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-200 pointer-events-none"
+            />
+            <motion.div
+              animate={{ rotate: -315 }}
+              transition={{ repeat: Infinity, duration: 50, ease: "linear" }}
+              className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-300 pointer-events-none"
+            />
 
             <Link
               href="/camera"
               className="group relative z-10 flex flex-col items-center text-center cursor-pointer"
             >
-              <div className="w-24 h-24 rounded-full border border-[#1A1B1C] flex items-center justify-center bg-white group-hover:scale-105 transition-transform duration-300">
+              <div className="w-24 h-24 rounded-full border border-[#1A1B1C] flex items-center justify-center bg-white group-hover:scale-105 group-hover:bg-[#1A1B1C] group-hover:text-white transition-all duration-300">
                 <svg
-                  className="w-10 h-10 text-[#1A1B1C]"
+                  className="w-10 h-10 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
@@ -135,21 +167,34 @@ export default function ResultPage() {
                 ALLOW A.I. TO SCAN YOUR FACE
               </span>
             </Link>
-          </div>
+          </motion.div>
 
           {/* Option 2: Gallery Upload */}
-          <div className="relative flex flex-col items-center justify-center">
-            <div className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-200 rotate-[35deg] pointer-events-none" />
-            <div className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-300 rotate-[45deg] pointer-events-none" />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="relative flex flex-col items-center justify-center"
+          >
+            <motion.div
+              animate={{ rotate: 395 }}
+              transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+              className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-200 pointer-events-none"
+            />
+            <motion.div
+              animate={{ rotate: -315 }}
+              transition={{ repeat: Infinity, duration: 50, ease: "linear" }}
+              className="absolute w-56 h-56 sm:w-64 sm:h-64 border border-dashed border-gray-300 pointer-events-none"
+            />
 
             <button
               type="button"
               onClick={handleGalleryClick}
               className="group relative z-10 flex flex-col items-center text-center cursor-pointer"
             >
-              <div className="w-24 h-24 rounded-full border border-[#1A1B1C] flex items-center justify-center bg-white group-hover:scale-105 transition-transform duration-300">
+              <div className="w-24 h-24 rounded-full border border-[#1A1B1C] flex items-center justify-center bg-white group-hover:scale-105 group-hover:bg-[#1A1B1C] group-hover:text-white transition-all duration-300">
                 <svg
-                  className="w-10 h-10 text-[#1A1B1C]"
+                  className="w-10 h-10 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
@@ -174,7 +219,7 @@ export default function ResultPage() {
               onChange={handleFileChange}
               className="hidden"
             />
-          </div>
+          </motion.div>
         </div>
       )}
 
@@ -188,7 +233,7 @@ export default function ResultPage() {
           href="/testing"
           className="group flex items-center gap-4 text-[11px] font-semibold tracking-wider uppercase text-[#1A1B1C]"
         >
-          <span className="w-8 h-8 border border-[#1A1B1C] rotate-45 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <span className="w-8 h-8 border border-[#1A1B1C] rotate-45 flex items-center justify-center group-hover:scale-110 group-hover:bg-[#1A1B1C] group-hover:text-white transition-all duration-300">
             <span className="-rotate-45 text-[10px]">◀</span>
           </span>
           <span>BACK</span>

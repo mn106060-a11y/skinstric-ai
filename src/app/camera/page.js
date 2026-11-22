@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function CameraPage() {
   const router = useRouter();
@@ -10,12 +11,10 @@ export default function CameraPage() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
-  // "permission" | "streaming" | "captured" | "loading"
-  const [stage, setStage] = useState("permission");
+  const [stage, setStage] = useState("permission"); // "permission" | "streaming" | "captured" | "loading"
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState("");
 
-  // Stop webcam tracks cleanly whenever we leave the page
   useEffect(() => {
     return () => {
       stopCamera();
@@ -39,7 +38,6 @@ export default function CameraPage() {
       streamRef.current = stream;
       setStage("streaming");
 
-      // Attach stream once the <video> element renders
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -61,7 +59,6 @@ export default function CameraPage() {
     canvas.height = video.videoHeight || 480;
 
     const ctx = canvas.getContext("2d");
-    // Mirror horizontally so the snapshot matches the natural selfie preview
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -120,10 +117,23 @@ export default function CameraPage() {
       {/* Stage 1: Camera Permission Prompt */}
       {stage === "permission" && (
         <div className="relative flex-1 flex flex-col items-center justify-center my-auto z-10">
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200 rotate-[35deg] pointer-events-none" />
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300 rotate-[45deg] pointer-events-none" />
+          <motion.div
+            animate={{ rotate: 395 }}
+            transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200 pointer-events-none"
+          />
+          <motion.div
+            animate={{ rotate: -315 }}
+            transition={{ repeat: Infinity, duration: 50, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300 pointer-events-none"
+          />
 
-          <div className="z-10 bg-white border border-[#1A1B1C] p-6 sm:p-8 max-w-sm w-full text-center shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="z-10 bg-white border border-[#1A1B1C] p-6 sm:p-8 max-w-sm w-full text-center shadow-sm"
+          >
             <p className="text-xs font-semibold tracking-wider uppercase text-[#1A1B1C] mb-6">
               ALLOW A.I. TO ACCESS YOUR CAMERA
             </p>
@@ -142,7 +152,7 @@ export default function CameraPage() {
                 ALLOW
               </button>
             </div>
-          </div>
+          </motion.div>
 
           {error && (
             <p className="mt-4 max-w-sm text-center text-xs text-red-500 z-10">
@@ -154,7 +164,12 @@ export default function CameraPage() {
 
       {/* Stage 2: Live Camera Feed */}
       {stage === "streaming" && (
-        <div className="fixed inset-0 z-30 bg-black flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-30 bg-black flex flex-col justify-between"
+        >
           <video
             ref={videoRef}
             autoPlay
@@ -163,12 +178,15 @@ export default function CameraPage() {
             className="w-full h-full object-cover -scale-x-100"
           />
 
-          {/* Overlay Guidance & Capture Trigger */}
           <div className="fixed inset-0 flex flex-col justify-between p-6 md:p-10 pointer-events-none">
             <div />
 
-            {/* Right-Side Take Picture Button */}
-            <div className="self-end my-auto pointer-events-auto">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="self-end my-auto pointer-events-auto"
+            >
               <button
                 type="button"
                 onClick={handleTakePicture}
@@ -198,9 +216,8 @@ export default function CameraPage() {
                   </svg>
                 </span>
               </button>
-            </div>
+            </motion.div>
 
-            {/* Bottom Tips + Back Button */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto">
               <Link
                 href="/result"
@@ -227,12 +244,16 @@ export default function CameraPage() {
               <div className="hidden sm:block w-20" />
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Stage 3: Snapshot Preview ("GREAT SHOT!") */}
       {stage === "captured" && capturedImage && (
-        <div className="fixed inset-0 z-30 bg-black flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-30 bg-black flex flex-col justify-between"
+        >
           <img
             src={capturedImage}
             alt="Captured selfie"
@@ -240,11 +261,15 @@ export default function CameraPage() {
           />
 
           <div className="fixed inset-0 bg-black/25 flex flex-col justify-between p-6 md:p-10">
-            <div className="mt-14 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: -15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-14 text-center"
+            >
               <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-white">
                 GREAT SHOT!
               </p>
-            </div>
+            </motion.div>
 
             {error && (
               <p className="text-center text-xs text-red-300 bg-black/70 px-4 py-2 rounded self-center">
@@ -252,7 +277,11 @@ export default function CameraPage() {
               </p>
             )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col sm:flex-row items-center justify-between gap-4"
+            >
               <Link
                 href="/result"
                 className="group flex items-center gap-4 text-[11px] font-semibold tracking-wider uppercase text-white self-start sm:self-auto"
@@ -286,33 +315,43 @@ export default function CameraPage() {
               </div>
 
               <div className="hidden sm:block w-20" />
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Stage 4: Uploading Snapshot */}
       {stage === "loading" && (
-        <div className="relative flex-1 flex flex-col items-center justify-center my-auto z-10">
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200 rotate-[35deg] animate-spin [animation-duration:25s]" />
-          <div className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300 rotate-[45deg] animate-spin [animation-duration:20s]" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="relative flex-1 flex flex-col items-center justify-center my-auto z-10"
+        >
+          <motion.div
+            animate={{ rotate: 395 }}
+            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-200"
+          />
+          <motion.div
+            animate={{ rotate: -315 }}
+            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+            className="absolute w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] border border-dashed border-gray-300"
+          />
           <p className="z-10 text-xs sm:text-sm font-semibold tracking-widest uppercase text-[#1A1B1C] animate-pulse">
             ANALYZING YOUR PHOTO...
           </p>
-        </div>
+        </motion.div>
       )}
 
-      {/* Hidden Canvas for Capturing Frame */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Bottom Left BACK Button on Permission Screen */}
       {stage === "permission" && (
         <div className="flex items-center justify-between w-full z-10">
           <Link
             href="/result"
             className="group flex items-center gap-4 text-[11px] font-semibold tracking-wider uppercase text-[#1A1B1C]"
           >
-            <span className="w-8 h-8 border border-[#1A1B1C] rotate-45 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <span className="w-8 h-8 border border-[#1A1B1C] rotate-45 flex items-center justify-center group-hover:scale-110 group-hover:bg-[#1A1B1C] group-hover:text-white transition-all duration-300">
               <span className="-rotate-45 text-[10px]">◀</span>
             </span>
             <span>BACK</span>
